@@ -1,28 +1,38 @@
+import React, { useState, useEffect } from 'react';
 
-import React, { useRef } from 'react';
-import { useCart } from './CartContext';
-import Cart from './Cart';
+function App() {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
 
-const App = () => {
-  const { addToCart } = useCart();
-  const itemRef = useRef(null);
-
-  const handleAddItem = () => {
-    const item = itemRef.current.value;
-    if (item) {
-      addToCart(item);
-      itemRef.current.value = '';
+  const fetchData = async () => {
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+      }
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      setError(error.message);
+      console.error('There was a problem with the fetch operation:', error);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div>
-      <h1>Shopping Cart Application</h1>
-      <input ref={itemRef} type="text" placeholder="Enter item name" />
-      <button onClick={handleAddItem}>Add Item to Cart</button>
-      <Cart />
+      <h1>Posts</h1>
+      {error && <p>Error: {error}</p>}
+      <ul>
+        {data.map(post => (
+          <li key={post.id}>{post.title}</li>
+        ))}
+      </ul>
     </div>
   );
-};
+}
 
 export default App;
